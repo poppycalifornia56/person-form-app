@@ -1,0 +1,535 @@
+<div class="form-page">
+  <div *ngIf="isLoading" class="skeleton">
+    <div class="skeleton__card">
+      <div class="skeleton__header">
+        <div class="skeleton__title"></div>
+        <div class="skeleton__subtitle"></div>
+      </div>
+      <div class="skeleton__field"></div>
+      <div class="skeleton__field"></div>
+      <div class="skeleton__field"></div>
+      <div class="skeleton__field"></div>
+      <div class="skeleton__field"></div>
+    </div>
+  </div>
+
+  <div *ngIf="loadError && !isLoading" class="error-banner">
+    <svg
+      class="error-banner__icon"
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span class="error-banner__text"
+      >Fehler beim Laden der Länderdaten. Bitte Seite neu laden.</span
+    >
+  </div>
+
+  <div class="form-page__container" *ngIf="!isLoading">
+    <div class="form-card">
+      <div class="form-header">
+        <h1 class="form-header__title">Persönliche Informationen</h1>
+        <p class="form-header__subtitle">Bitte füllen Sie alle erforderlichen Felder (*) aus</p>
+      </div>
+
+      <div *ngIf="submittedData" class="success" [class.success--visible]="showSuccessAnimation">
+        <div class="success__icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <h2 class="success__title">Formular erfolgreich übermittelt!</h2>
+        <p class="success__subtitle">Ihre Daten wurden erfolgreich gespeichert.</p>
+
+        <div class="data-display">
+          <div class="data-display__row">
+            <span class="data-display__label">Anrede:</span>
+            <span class="data-display__value">{{ submittedData.anrede }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">Vorname:</span>
+            <span class="data-display__value">{{ submittedData.vorname }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">Nachname:</span>
+            <span class="data-display__value">{{ submittedData.nachname }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">Geburtsdatum:</span>
+            <span class="data-display__value">{{ submittedData.geburtsdatum }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">Adresse:</span>
+            <span class="data-display__value">{{ submittedData.adresse }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">PLZ:</span>
+            <span class="data-display__value">{{ submittedData.plz }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">Ort:</span>
+            <span class="data-display__value">{{ submittedData.ort }}</span>
+          </div>
+          <div class="data-display__row">
+            <span class="data-display__label">Land:</span>
+            <span class="data-display__value">{{ getCountryName(submittedData.land) }}</span>
+          </div>
+        </div>
+
+        <button type="button" class="button button--secondary" (click)="resetForm()">
+          <svg
+            class="button__icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Neues Formular
+        </button>
+      </div>
+
+      <form *ngIf="!submittedData" class="form" [formGroup]="personForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="anrede" class="form-group__label">
+            Anrede <span class="form-group__required">*</span>
+            <span
+              class="tooltip"
+              (mouseenter)="showTooltip('anrede')"
+              (mouseleave)="hideTooltip('anrede')"
+            >
+              ⓘ
+              <span
+                class="tooltip__text"
+                [class.tooltip__text--visible]="isTooltipVisible('anrede')"
+              >
+                {{ getTooltipText('anrede') }}
+              </span>
+            </span>
+          </label>
+          <div class="input-field">
+            <select
+              id="anrede"
+              formControlName="anrede"
+              class="input-field__control"
+              [class.input-field__control--invalid]="isFieldInvalid('anrede')"
+              [class.input-field__control--valid]="isFieldValid('anrede')"
+            >
+              <option value="">Bitte wählen</option>
+              <option *ngFor="let sal of salutations" [value]="sal.value">
+                {{ sal.label }}
+              </option>
+            </select>
+            <span class="input-field__check" *ngIf="isFieldValid('anrede')">✓</span>
+          </div>
+          <div class="form-group__error" *ngIf="isFieldInvalid('anrede')">
+            <svg
+              class="form-group__error-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {{ getErrorMessage('anrede') }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="vorname" class="form-group__label">
+              Vorname <span class="form-group__required">*</span>
+              <span
+                class="tooltip"
+                (mouseenter)="showTooltip('vorname')"
+                (mouseleave)="hideTooltip('vorname')"
+              >
+                ⓘ
+                <span
+                  class="tooltip__text"
+                  [class.tooltip__text--visible]="isTooltipVisible('vorname')"
+                >
+                  {{ getTooltipText('vorname') }}
+                </span>
+              </span>
+            </label>
+            <div class="input-field">
+              <input
+                type="text"
+                id="vorname"
+                formControlName="vorname"
+                class="input-field__control"
+                placeholder="Max"
+                [class.input-field__control--invalid]="isFieldInvalid('vorname')"
+                [class.input-field__control--valid]="isFieldValid('vorname')"
+              />
+              <span class="input-field__check" *ngIf="isFieldValid('vorname')">✓</span>
+            </div>
+            <div class="form-group__error" *ngIf="isFieldInvalid('vorname')">
+              <svg
+                class="form-group__error-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              {{ getErrorMessage('vorname') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nachname" class="form-group__label">
+              Nachname <span class="form-group__required">*</span>
+              <span
+                class="tooltip"
+                (mouseenter)="showTooltip('nachname')"
+                (mouseleave)="hideTooltip('nachname')"
+              >
+                ⓘ
+                <span
+                  class="tooltip__text"
+                  [class.tooltip__text--visible]="isTooltipVisible('nachname')"
+                >
+                  {{ getTooltipText('nachname') }}
+                </span>
+              </span>
+            </label>
+            <div class="input-field">
+              <input
+                type="text"
+                id="nachname"
+                formControlName="nachname"
+                class="input-field__control"
+                placeholder="Mustermann"
+                [class.input-field__control--invalid]="isFieldInvalid('nachname')"
+                [class.input-field__control--valid]="isFieldValid('nachname')"
+              />
+              <span class="input-field__check" *ngIf="isFieldValid('nachname')">✓</span>
+            </div>
+            <div class="form-group__error" *ngIf="isFieldInvalid('nachname')">
+              <svg
+                class="form-group__error-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              {{ getErrorMessage('nachname') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="geburtsdatum" class="form-group__label">
+            Geburtsdatum <span class="form-group__required">*</span>
+            <span
+              class="tooltip"
+              (mouseenter)="showTooltip('geburtsdatum')"
+              (mouseleave)="hideTooltip('geburtsdatum')"
+            >
+              ⓘ
+              <span
+                class="tooltip__text"
+                [class.tooltip__text--visible]="isTooltipVisible('geburtsdatum')"
+              >
+                {{ getTooltipText('geburtsdatum') }}
+              </span>
+            </span>
+          </label>
+          <div class="input-field">
+            <input
+              type="date"
+              id="geburtsdatum"
+              formControlName="geburtsdatum"
+              class="input-field__control"
+              min="1900-01-01"
+              [max]="today"
+              readonly
+              onfocus="this.removeAttribute('readonly'); this.showPicker();"
+              [class.input-field__control--invalid]="isFieldInvalid('geburtsdatum')"
+              [class.input-field__control--valid]="isFieldValid('geburtsdatum')"
+            />
+            <span class="input-field__check" *ngIf="isFieldValid('geburtsdatum')">✓</span>
+          </div>
+          <div class="form-group__error" *ngIf="isFieldInvalid('geburtsdatum')">
+            <svg
+              class="form-group__error-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {{ getErrorMessage('geburtsdatum') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="adresse" class="form-group__label">
+            Adresse <span class="form-group__required">*</span>
+            <span
+              class="tooltip"
+              (mouseenter)="showTooltip('adresse')"
+              (mouseleave)="hideTooltip('adresse')"
+            >
+              ⓘ
+              <span
+                class="tooltip__text"
+                [class.tooltip__text--visible]="isTooltipVisible('adresse')"
+              >
+                {{ getTooltipText('adresse') }}
+              </span>
+            </span>
+          </label>
+          <div class="input-field">
+            <input
+              type="text"
+              id="adresse"
+              formControlName="adresse"
+              class="input-field__control"
+              placeholder="Musterstraße 123"
+              [class.input-field__control--invalid]="isFieldInvalid('adresse')"
+              [class.input-field__control--valid]="isFieldValid('adresse')"
+            />
+            <span class="input-field__check" *ngIf="isFieldValid('adresse')">✓</span>
+          </div>
+          <div class="form-group__error" *ngIf="isFieldInvalid('adresse')">
+            <svg
+              class="form-group__error-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {{ getErrorMessage('adresse') }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="plz" class="form-group__label">
+              PLZ <span class="form-group__required">*</span>
+              <span
+                class="tooltip"
+                (mouseenter)="showTooltip('plz')"
+                (mouseleave)="hideTooltip('plz')"
+              >
+                ⓘ
+                <span
+                  class="tooltip__text"
+                  [class.tooltip__text--visible]="isTooltipVisible('plz')"
+                >
+                  {{ getTooltipText('plz') }}
+                </span>
+              </span>
+            </label>
+            <div class="input-field">
+              <input
+                type="text"
+                id="plz"
+                formControlName="plz"
+                class="input-field__control"
+                placeholder="12345"
+                maxlength="5"
+                [class.input-field__control--invalid]="isFieldInvalid('plz')"
+                [class.input-field__control--valid]="isFieldValid('plz')"
+              />
+              <span class="input-field__check" *ngIf="isFieldValid('plz')">✓</span>
+            </div>
+            <div class="form-group__error" *ngIf="isFieldInvalid('plz')">
+              <svg
+                class="form-group__error-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              {{ getErrorMessage('plz') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ort" class="form-group__label">
+              Ort <span class="form-group__required">*</span>
+              <span
+                class="tooltip"
+                (mouseenter)="showTooltip('ort')"
+                (mouseleave)="hideTooltip('ort')"
+              >
+                ⓘ
+                <span
+                  class="tooltip__text"
+                  [class.tooltip__text--visible]="isTooltipVisible('ort')"
+                >
+                  {{ getTooltipText('ort') }}
+                </span>
+              </span>
+            </label>
+            <div class="input-field">
+              <input
+                type="text"
+                id="ort"
+                formControlName="ort"
+                class="input-field__control"
+                placeholder="Berlin"
+                [class.input-field__control--invalid]="isFieldInvalid('ort')"
+                [class.input-field__control--valid]="isFieldValid('ort')"
+              />
+              <span class="input-field__check" *ngIf="isFieldValid('ort')">✓</span>
+            </div>
+            <div class="form-group__error" *ngIf="isFieldInvalid('ort')">
+              <svg
+                class="form-group__error-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              {{ getErrorMessage('ort') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="land" class="form-group__label">
+            Land <span class="form-group__required">*</span>
+            <span
+              class="tooltip"
+              (mouseenter)="showTooltip('land')"
+              (mouseleave)="hideTooltip('land')"
+            >
+              ⓘ
+              <span class="tooltip__text" [class.tooltip__text--visible]="isTooltipVisible('land')">
+                {{ getTooltipText('land') }}
+              </span>
+            </span>
+          </label>
+          <div class="input-field">
+            <select
+              id="land"
+              formControlName="land"
+              class="input-field__control"
+              [class.input-field__control--invalid]="isFieldInvalid('land')"
+              [class.input-field__control--valid]="isFieldValid('land')"
+            >
+              <option value="">Bitte wählen</option>
+              <option *ngFor="let country of countries" [value]="country.code">
+                {{ country.name }}
+              </option>
+            </select>
+            <span class="input-field__check" *ngIf="isFieldValid('land')">✓</span>
+          </div>
+          <div class="form-group__error" *ngIf="isFieldInvalid('land')">
+            <svg
+              class="form-group__error-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {{ getErrorMessage('land') }}
+          </div>
+        </div>
+
+        <div class="form__actions">
+          <button
+            type="submit"
+            class="button button--primary"
+            [disabled]="!isFormValid"
+            [class.button--disabled]="!isFormValid"
+          >
+            <svg
+              class="button__icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Formular absenden
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
