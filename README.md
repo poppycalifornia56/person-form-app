@@ -40,7 +40,6 @@ Angular-based form application created as a technical assessment for evoila GmbH
 - TypeScript 5.8.3
 - Reactive Forms
 - RxJS for async operations
-- jsPDF for PDF generation
 
 ## Installation
 ```bash
